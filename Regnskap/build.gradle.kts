@@ -13,8 +13,7 @@ version = "0.0.1"
 application {
     mainClass.set("no.maadb.ApplicationKt")
 
-    val isDevelopment: Boolean = project.ext.has("development")
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
 }
 
 repositories {
