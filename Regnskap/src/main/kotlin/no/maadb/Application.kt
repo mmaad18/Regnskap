@@ -2,6 +2,7 @@ package no.maadb
 
 import io.ktor.server.application.*
 import io.ktor.server.plugins.cors.routing.*
+import no.maadb.dao.DatabaseFactory
 import no.maadb.plugins.configureRouting
 import no.maadb.plugins.configureSerialization
 
@@ -11,6 +12,8 @@ fun Application.module() {
     install(CORS) {
         anyHost()
     }
+
+    DatabaseFactory.init()
 
     configureRouting()
     configureSerialization()
