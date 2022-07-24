@@ -1,7 +1,6 @@
 package no.maadb.dao
 
 import no.maadb.dao.DatabaseFactory.dbQuery
-import no.maadb.models.Receipt
 import no.maadb.models.Transaction
 import no.maadb.models.Transactions
 import org.jetbrains.exposed.sql.*
@@ -12,6 +11,12 @@ class TransactionDaoImpl : TransactionDao {
             .select { Transactions.id eq id }
             .map(::resultRowToTransaction)
             .singleOrNull()
+    }
+
+    override suspend fun byParentId(id: Long): List<Transaction> = dbQuery {
+        Transactions
+            .selectAll()
+            .map(::resultRowToTransaction)
     }
 
     override suspend fun all(): List<Transaction> = dbQuery {
@@ -25,24 +30,28 @@ class TransactionDaoImpl : TransactionDao {
             .deleteWhere { Transactions.id eq id } > 0
     }
 
-    override suspend fun add(receipts: List<Receipt>): Transaction? = dbQuery {
+    override suspend fun add(): Transaction? = dbQuery {
         val insertStatement = Transactions.insert {
-            it[Transactions.receipts] = receipts.toString()
-            it[Transactions.flowIn] = receipts.sumOf { it.flowIn }
-            it[Transactions.flowOut] = receipts.sumOf { it.flowOut }
-            it[Transactions.balance] = it[Transactions.flowIn] - it[Transactions.flowOut]
+            it[flowIn] = 0.0
+            it[flowOut] = 0.0
+            it[balance] = 0.0
         }
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToTransaction)
     }
 
-    override suspend fun edit(id: Long, receipts: List<Receipt>): Boolean = dbQuery {
+    override suspend fun update(id: Long): Boolean = dbQuery {
+        val receipts = ReceiptDaoImpl().byParentId(id)
+        val sumIn = receipts.sumOf { it.flowIn }
+        val sumOut = receipts.sumOf { it.flowOut }
+
         Transactions.update({ Transactions.id eq id }) {
-            it[Transactions.receipts] = receipts.toString()
+            it[flowIn] = sumIn
+            it[flowOut] = sumOut
+            it[balance] = sumIn - sumOut
         } > 0
     }
 
     private fun resultRowToTransaction(row: ResultRow) = Transaction(
         id = row[Transactions.id],
-        receipts = listOf(row[Transactions.receipts] as Receipt),
     )
 }

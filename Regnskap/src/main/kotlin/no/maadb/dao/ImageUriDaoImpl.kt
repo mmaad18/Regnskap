@@ -13,6 +13,12 @@ class ImageUriDaoImpl : ImageUriDao {
             .singleOrNull()
     }
 
+    override suspend fun byParentId(id: Long): List<ImageUri> = dbQuery {
+        ImageUris
+            .select { ImageUris.receiptId eq id }
+            .map(::resultRowToImageUri)
+    }
+
     override suspend fun all(): List<ImageUri> = dbQuery {
         ImageUris
             .selectAll()

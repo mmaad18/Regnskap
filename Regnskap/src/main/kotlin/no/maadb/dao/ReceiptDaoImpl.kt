@@ -13,6 +13,12 @@ class ReceiptDaoImpl : ReceiptDao {
             .singleOrNull()
     }
 
+    override suspend fun byParentId(id: Long): List<Receipt> = dbQuery {
+        Receipts
+            .select { Receipts.transactionId eq id }
+            .map(::resultRowToReceipt)
+    }
+
     override suspend fun all(): List<Receipt> = dbQuery {
         Receipts
             .selectAll()
@@ -28,16 +34,14 @@ class ReceiptDaoImpl : ReceiptDao {
         transactionId: Long,
         flowIn: Double,
         flowOut: Double,
-        details: String,
-        imageUris: List<String>
+        details: String
     ): Receipt? = dbQuery {
         val insertStatement = Receipts.insert {
             it[Receipts.transactionId] = transactionId
             it[Receipts.flowIn] = flowIn
             it[Receipts.flowOut] = flowOut
-            it[Receipts.balance] = flowIn - flowOut
+            it[balance] = flowIn - flowOut
             it[Receipts.details] = details
-            it[Receipts.imageUris] = imageUris.toString()
         }
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToReceipt)
     }
@@ -47,16 +51,14 @@ class ReceiptDaoImpl : ReceiptDao {
         transactionId: Long,
         flowIn: Double,
         flowOut: Double,
-        details: String,
-        imageUris: List<String>
+        details: String
     ): Boolean = dbQuery {
         Receipts.update({ Receipts.id eq id }) {
             it[Receipts.transactionId] = transactionId
             it[Receipts.flowIn] = flowIn
             it[Receipts.flowOut] = flowOut
-            it[Receipts.balance] = flowIn - flowOut
+            it[balance] = flowIn - flowOut
             it[Receipts.details] = details
-            it[Receipts.imageUris] = imageUris.toString()
         } > 0
     }
 
@@ -66,6 +68,5 @@ class ReceiptDaoImpl : ReceiptDao {
         flowIn = row[Receipts.flowIn],
         flowOut = row[Receipts.flowOut],
         details = row[Receipts.details],
-        imageUris = listOf(row[Receipts.imageUris]),
     )
 }
