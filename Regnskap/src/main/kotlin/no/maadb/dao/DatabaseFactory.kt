@@ -15,8 +15,10 @@ object DatabaseFactory {
         val appConfig = HoconApplicationConfig(ConfigFactory.load())
         val driverClassName = appConfig.property("db.driverClassName").getString()
         val jdbcURL = appConfig.property("db.jdbcUrl").getString()
+        val username = appConfig.property("db.username").getString()
+        val password = appConfig.property("db.password").getString()
 
-        val database = Database.connect(jdbcURL, driverClassName)
+        val database = Database.connect(jdbcURL, driverClassName, username, password)
 
         transaction(database) {
             SchemaUtils.create(Transactions)
