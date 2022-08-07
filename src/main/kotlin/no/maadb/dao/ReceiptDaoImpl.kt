@@ -46,6 +46,17 @@ class ReceiptDaoImpl : ReceiptDao {
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToReceipt)
     }
 
+    override suspend fun add(receipt: Receipt): Receipt? = dbQuery {
+        val insertStatement = Receipts.insert {
+            it[transactionId] = receipt.transactionId
+            it[flowIn] = receipt.flowIn
+            it[flowOut] = receipt.flowOut
+            it[balance] = receipt.flowIn - receipt.flowOut
+            it[details] = receipt.details
+        }
+        insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToReceipt)
+    }
+
     override suspend fun edit(
         id: Long,
         transactionId: Long,
@@ -62,6 +73,16 @@ class ReceiptDaoImpl : ReceiptDao {
         } > 0
     }
 
+    override suspend fun edit(receipt: Receipt): Boolean = dbQuery {
+        Receipts.update({ Receipts.id eq receipt.id }) {
+            it[transactionId] = receipt.transactionId
+            it[flowIn] = receipt.flowIn
+            it[flowOut] = receipt.flowOut
+            it[balance] = receipt.flowIn - receipt.flowOut
+            it[details] = receipt.details
+        } > 0
+    }
+
     private fun resultRowToReceipt(row: ResultRow) = Receipt(
         id = row[Receipts.id],
         transactionId = row[Receipts.transactionId],
@@ -70,3 +91,5 @@ class ReceiptDaoImpl : ReceiptDao {
         details = row[Receipts.details],
     )
 }
+
+val receiptDao: ReceiptDao = ReceiptDaoImpl()

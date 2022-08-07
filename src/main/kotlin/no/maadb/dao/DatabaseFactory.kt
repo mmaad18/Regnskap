@@ -3,6 +3,8 @@ package no.maadb.dao
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.*
 import kotlinx.coroutines.Dispatchers
+import no.maadb.models.ImageUris
+import no.maadb.models.Receipts
 import no.maadb.models.Transactions
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -22,7 +24,8 @@ object DatabaseFactory {
 
         transaction(database) {
             SchemaUtils.create(Transactions)
-            SchemaUtils.create(Transactions)
+            SchemaUtils.create(Receipts)
+            SchemaUtils.create(ImageUris)
         }
     }
 

@@ -11,4 +11,5 @@ object Transactions : Table() {
     val flowIn = double("flow_in")
     val flowOut = double("flow_out")
     val balance = double("balance")
+    override val primaryKey = PrimaryKey(id)
 }

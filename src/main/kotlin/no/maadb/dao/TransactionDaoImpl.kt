@@ -39,6 +39,15 @@ class TransactionDaoImpl : TransactionDao {
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToTransaction)
     }
 
+    override suspend fun add(transaction: Transaction): Transaction? = dbQuery {
+        val insertStatement = Transactions.insert {
+            it[flowIn] = 0.0
+            it[flowOut] = 0.0
+            it[balance] = 0.0
+        }
+        insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToTransaction)
+    }
+
     override suspend fun update(id: Long): Boolean = dbQuery {
         val receipts = ReceiptDaoImpl().byParentId(id)
         val sumIn = receipts.sumOf { it.flowIn }
@@ -51,7 +60,21 @@ class TransactionDaoImpl : TransactionDao {
         } > 0
     }
 
+    override suspend fun edit(transaction: Transaction): Boolean = dbQuery {
+        val receipts = ReceiptDaoImpl().byParentId(transaction.id)
+        val sumIn = receipts.sumOf { it.flowIn }
+        val sumOut = receipts.sumOf { it.flowOut }
+
+        Transactions.update({ Transactions.id eq transaction.id }) {
+            it[flowIn] = sumIn
+            it[flowOut] = sumOut
+            it[balance] = sumIn - sumOut
+        } > 0
+    }
+
     private fun resultRowToTransaction(row: ResultRow) = Transaction(
         id = row[Transactions.id],
     )
 }
+
+val transactionDao: TransactionDao = TransactionDaoImpl()

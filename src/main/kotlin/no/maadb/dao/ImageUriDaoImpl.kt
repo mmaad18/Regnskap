@@ -38,10 +38,25 @@ class ImageUriDaoImpl : ImageUriDao {
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToImageUri)
     }
 
+    override suspend fun add(imageUri: ImageUri): ImageUri? = dbQuery {
+        val insertStatement = ImageUris.insert {
+            it[receiptId] = imageUri.receiptId
+            it[uri] = imageUri.uri
+        }
+        insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToImageUri)
+    }
+
     override suspend fun edit(id: Long, receiptId: Long, uri: String): Boolean = dbQuery {
         ImageUris.update({ ImageUris.id eq id }) {
             it[ImageUris.receiptId] = receiptId
             it[ImageUris.uri] = uri
+        } > 0
+    }
+
+    override suspend fun edit(imageUri: ImageUri): Boolean = dbQuery {
+        ImageUris.update({ ImageUris.id eq imageUri.id }) {
+            it[receiptId] = imageUri.receiptId
+            it[uri] = imageUri.uri
         } > 0
     }
 
@@ -51,3 +66,5 @@ class ImageUriDaoImpl : ImageUriDao {
         uri = row[ImageUris.uri],
     )
 }
+
+val imageUriDao: ImageUriDao = ImageUriDaoImpl()
