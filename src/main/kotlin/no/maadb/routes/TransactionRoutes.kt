@@ -50,7 +50,7 @@ fun Route.transactionRouting() {
                 }
             }
         }
-        post("edit") {
+        patch("edit") {
             val body = call.receive<Transaction>()
             val transaction = transactionDao.byId(body.id)
             if(transaction == null) {

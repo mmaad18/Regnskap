@@ -36,7 +36,12 @@ fun Route.imageUriRouting() {
                 call.respond(HttpStatusCode.OK, imageUri)
             }
         }
-        post("edit") {
+        get("parent/{id}") {
+            val id = call.parameters.getOrFail<Long>("id")
+            val imageUris = imageUriDao.byParentId(id)
+            call.respond(HttpStatusCode.OK, imageUris)
+        }
+        patch("edit") {
             val body = call.receive<ImageUri>()
             val imageUri = imageUriDao.byId(body.id)
             if(imageUri == null) {
@@ -50,6 +55,11 @@ fun Route.imageUriRouting() {
                     call.respond(HttpStatusCode.BadRequest, "Could not update image uri with id: ${body.id}.")
                 }
             }
+        }
+        delete("{id}") {
+            val id = call.parameters.getOrFail<Long>("id")
+            imageUriDao.delete(id)
+            call.respondRedirect("/imageuri")
         }
     }
 }

@@ -36,7 +36,12 @@ fun Route.receiptRouting() {
                 call.respond(HttpStatusCode.OK, receipt)
             }
         }
-        post("edit") {
+        get("parent/{id}") {
+            val id = call.parameters.getOrFail<Long>("id")
+            val receipts = receiptDao.byParentId(id)
+            call.respond(HttpStatusCode.OK, receipts)
+        }
+        patch("edit") {
             val body = call.receive<Receipt>()
             val receipt = receiptDao.byId(body.id)
             if(receipt == null) {
