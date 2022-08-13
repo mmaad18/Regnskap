@@ -35,7 +35,7 @@ fun Route.transactionRouting() {
                 call.respond(HttpStatusCode.OK, transaction)
             }
         }
-        post("{id}") {
+        patch("{id}") {
             val id = call.parameters.getOrFail<Long>("id")
             val transaction = transactionDao.byId(id)
             if(transaction == null) {
