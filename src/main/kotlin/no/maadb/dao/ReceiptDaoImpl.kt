@@ -88,6 +88,7 @@ class ReceiptDaoImpl : ReceiptDao {
         transactionId = row[Receipts.transactionId],
         flowIn = row[Receipts.flowIn],
         flowOut = row[Receipts.flowOut],
+        balance = row[Receipts.balance],
         details = row[Receipts.details],
     )
 }

@@ -4,7 +4,14 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.Table
 
 @Serializable
-data class Receipt(val id: Long, val transactionId: Long, val flowIn: Double, val flowOut: Double, val details: String)
+data class Receipt(
+    val id: Long,
+    val transactionId: Long,
+    val flowIn: Double,
+    val flowOut: Double,
+    val balance: Double,
+    val details: String
+)
 
 object Receipts : Table() {
     val id = long("id").autoIncrement()

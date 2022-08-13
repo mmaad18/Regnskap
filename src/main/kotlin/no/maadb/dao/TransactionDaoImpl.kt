@@ -74,6 +74,9 @@ class TransactionDaoImpl : TransactionDao {
 
     private fun resultRowToTransaction(row: ResultRow) = Transaction(
         id = row[Transactions.id],
+        flowIn = row[Transactions.flowIn],
+        flowOut = row[Transactions.flowOut],
+        balance = row[Transactions.balance],
     )
 }
 

@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.Table
 
 @Serializable
-data class Transaction(val id: Long)
+data class Transaction(val id: Long, val flowIn: Double, val flowOut: Double, val balance: Double)
 
 object Transactions : Table() {
     val id = long("id").autoIncrement()
