@@ -11,18 +11,6 @@ import no.maadb.dao.transactionDao
 import no.maadb.models.ReceiptDto
 
 fun Route.receiptRouting() {
-    suspend fun updateTransaction(id: Long, call: ApplicationCall): Boolean {
-        val transaction = transactionDao.byId(id)
-
-        return if (transaction == null) {
-            call.respond(HttpStatusCode.NotFound, "Could not find transaction with id: ${id}.")
-            false
-        } else {
-            transactionDao.edit(id)
-            true
-        }
-    }
-
     route("receipt") {
         get {
             val receipts = receiptDao.all()
@@ -30,11 +18,12 @@ fun Route.receiptRouting() {
         }
         post("add") {
             val body = call.receive<ReceiptDto>()
-            if (updateTransaction(body.transactionId, call)) {
+            if (isTransaction(body.transactionId, call)) {
                 val receipt = receiptDao.add(body)
                 if (receipt == null) {
                     call.respond(HttpStatusCode.BadRequest, "Could not create receipt.")
                 } else {
+                    transactionDao.edit(receipt.transactionId)
                     call.respond(HttpStatusCode.Created, receipt)
                 }
             }
@@ -56,12 +45,10 @@ fun Route.receiptRouting() {
         patch("{id}/edit") {
             val id = call.parameters.getOrFail<Long>("id")
             val body = call.receive<ReceiptDto>()
-            if (updateTransaction(body.transactionId, call)) {
-                val receipt = receiptDao.byId(id)
-                if (receipt == null) {
-                    call.respond(HttpStatusCode.NotFound, "Could not find receipt with id: ${id}.")
-                } else {
+            if (isTransaction(body.transactionId, call)) {
+                if (isReceipt(id, call)) {
                     if (receiptDao.edit(id, body)) {
+                        transactionDao.edit(id)
                         call.respond(HttpStatusCode.OK)
                     } else {
                         call.respond(HttpStatusCode.BadRequest, "Could not update receipt with id: ${id}.")
@@ -76,7 +63,7 @@ fun Route.receiptRouting() {
                 call.respond(HttpStatusCode.NotFound, "Could not find receipt with id: ${id}.")
             } else {
                 receiptDao.delete(id)
-                updateTransaction(receipt.transactionId, call)
+                isTransaction(receipt.transactionId, call)
             }
             call.respondRedirect("/receipt")
         }
