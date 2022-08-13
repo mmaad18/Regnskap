@@ -22,3 +22,11 @@ object Receipts : Table() {
     val details = varchar("details", 4096)
     override val primaryKey = PrimaryKey(id)
 }
+
+@Serializable
+data class ReceiptDto(
+    val transactionId: Long,
+    val flowIn: Double,
+    val flowOut: Double,
+    val details: String
+)

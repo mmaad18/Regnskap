@@ -7,7 +7,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.util.*
 import no.maadb.dao.imageUriDao
-import no.maadb.models.ImageUri
+import no.maadb.models.ImageUriDto
 
 fun Route.imageUriRouting() {
     route("imageuri") {
@@ -16,7 +16,7 @@ fun Route.imageUriRouting() {
             call.respond(HttpStatusCode.OK, imageUris)
         }
         post("add") {
-            val body = call.receive<ImageUri>()
+            val body = call.receive<ImageUriDto>()
             val imageUri = imageUriDao.add(body)
 
             if(imageUri == null) {
@@ -41,22 +41,23 @@ fun Route.imageUriRouting() {
             val imageUris = imageUriDao.byParentId(id)
             call.respond(HttpStatusCode.OK, imageUris)
         }
-        patch("edit") {
-            val body = call.receive<ImageUri>()
-            val imageUri = imageUriDao.byId(body.id)
+        patch("{id}/edit") {
+            val id = call.parameters.getOrFail<Long>("id")
+            val body = call.receive<ImageUriDto>()
+            val imageUri = imageUriDao.byId(id)
             if(imageUri == null) {
-                call.respond(HttpStatusCode.NotFound, "Could not find image uri with id: ${body.id}.")
+                call.respond(HttpStatusCode.NotFound, "Could not find image uri with id: ${id}.")
             }
             else {
-                if(imageUriDao.edit(body)) {
+                if(imageUriDao.edit(id, body)) {
                     call.respond(HttpStatusCode.OK)
                 }
                 else {
-                    call.respond(HttpStatusCode.BadRequest, "Could not update image uri with id: ${body.id}.")
+                    call.respond(HttpStatusCode.BadRequest, "Could not update image uri with id: ${id}.")
                 }
             }
         }
-        delete("{id}") {
+        delete("{id}/delete") {
             val id = call.parameters.getOrFail<Long>("id")
             imageUriDao.delete(id)
             call.respondRedirect("/imageuri")

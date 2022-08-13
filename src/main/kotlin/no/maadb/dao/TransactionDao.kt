@@ -1,8 +1,6 @@
 package no.maadb.dao
 
 import no.maadb.models.Transaction
+import no.maadb.models.TransactionDto
 
-interface TransactionDao : Dao<Transaction> {
-    suspend fun add(): Transaction?
-    suspend fun update(id: Long): Boolean
-}
+interface TransactionDao : Dao<Transaction, TransactionDto>

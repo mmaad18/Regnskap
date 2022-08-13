@@ -13,3 +13,6 @@ object Transactions : Table() {
     val balance = double("balance")
     override val primaryKey = PrimaryKey(id)
 }
+
+@Serializable
+class TransactionDto()

@@ -1,8 +1,6 @@
 package no.maadb.dao
 
 import no.maadb.models.Receipt
+import no.maadb.models.ReceiptDto
 
-interface ReceiptDao : Dao<Receipt> {
-    suspend fun add(transactionId: Long, flowIn: Double, flowOut: Double, details: String): Receipt?
-    suspend fun edit(id: Long, transactionId: Long, flowIn: Double, flowOut: Double, details: String): Boolean
-}
+interface ReceiptDao : Dao<Receipt, ReceiptDto>

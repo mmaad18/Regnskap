@@ -7,7 +7,9 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.util.*
 import no.maadb.dao.receiptDao
-import no.maadb.models.Receipt
+import no.maadb.dao.transactionDao
+import no.maadb.models.ReceiptDto
+import no.maadb.models.TransactionDto
 
 fun Route.receiptRouting() {
     route("receipt") {
@@ -16,13 +18,14 @@ fun Route.receiptRouting() {
             call.respond(HttpStatusCode.OK, receipts)
         }
         post("add") {
-            val body = call.receive<Receipt>()
+            val body = call.receive<ReceiptDto>()
             val receipt = receiptDao.add(body)
 
             if(receipt == null) {
                 call.respond(HttpStatusCode.BadRequest, "Could not create receipt.")
             }
             else {
+                transactionDao.edit(receipt.id, TransactionDto())
                 call.respond(HttpStatusCode.Created, receipt)
             }
         }
@@ -41,24 +44,27 @@ fun Route.receiptRouting() {
             val receipts = receiptDao.byParentId(id)
             call.respond(HttpStatusCode.OK, receipts)
         }
-        patch("edit") {
-            val body = call.receive<Receipt>()
-            val receipt = receiptDao.byId(body.id)
+        patch("{id}/edit") {
+            val id = call.parameters.getOrFail<Long>("id")
+            val body = call.receive<ReceiptDto>()
+            val receipt = receiptDao.byId(id)
             if(receipt == null) {
-                call.respond(HttpStatusCode.NotFound, "Could not find receipt with id: ${body.id}.")
+                call.respond(HttpStatusCode.NotFound, "Could not find receipt with id: ${id}.")
             }
             else {
-                if(receiptDao.edit(body)) {
+                if(receiptDao.edit(id, body)) {
+                    transactionDao.edit(id, TransactionDto())
                     call.respond(HttpStatusCode.OK)
                 }
                 else {
-                    call.respond(HttpStatusCode.BadRequest, "Could not update receipt with id: ${body.id}.")
+                    call.respond(HttpStatusCode.BadRequest, "Could not update receipt with id: ${id}.")
                 }
             }
         }
-        delete("{id}") {
+        delete("{id}/delete") {
             val id = call.parameters.getOrFail<Long>("id")
             receiptDao.delete(id)
+            transactionDao.edit(id, TransactionDto())
             call.respondRedirect("/receipt")
         }
     }

@@ -12,3 +12,6 @@ object ImageUris : Table() {
     val uri = varchar("uri", 1024)
     override val primaryKey = PrimaryKey(id)
 }
+
+@Serializable
+data class ImageUriDto(val receiptId: Long, val uri: String)

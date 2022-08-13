@@ -2,6 +2,7 @@ package no.maadb.dao
 
 import no.maadb.dao.DatabaseFactory.dbQuery
 import no.maadb.models.ImageUri
+import no.maadb.models.ImageUriDto
 import no.maadb.models.ImageUris
 import org.jetbrains.exposed.sql.*
 
@@ -13,9 +14,9 @@ class ImageUriDaoImpl : ImageUriDao {
             .singleOrNull()
     }
 
-    override suspend fun byParentId(id: Long): List<ImageUri> = dbQuery {
+    override suspend fun byParentId(parentId: Long): List<ImageUri> = dbQuery {
         ImageUris
-            .select { ImageUris.receiptId eq id }
+            .select { ImageUris.receiptId eq parentId }
             .map(::resultRowToImageUri)
     }
 
@@ -30,33 +31,18 @@ class ImageUriDaoImpl : ImageUriDao {
             .deleteWhere { ImageUris.id eq id } > 0
     }
 
-    override suspend fun add(receiptId: Long, uri: String): ImageUri? = dbQuery {
+    override suspend fun add(dto: ImageUriDto): ImageUri? = dbQuery {
         val insertStatement = ImageUris.insert {
-            it[ImageUris.receiptId] = receiptId
-            it[ImageUris.uri] = uri
+            it[receiptId] = dto.receiptId
+            it[uri] = dto.uri
         }
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToImageUri)
     }
 
-    override suspend fun add(imageUri: ImageUri): ImageUri? = dbQuery {
-        val insertStatement = ImageUris.insert {
-            it[receiptId] = imageUri.receiptId
-            it[uri] = imageUri.uri
-        }
-        insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToImageUri)
-    }
-
-    override suspend fun edit(id: Long, receiptId: Long, uri: String): Boolean = dbQuery {
+    override suspend fun edit(id: Long, dto: ImageUriDto): Boolean = dbQuery {
         ImageUris.update({ ImageUris.id eq id }) {
-            it[ImageUris.receiptId] = receiptId
-            it[ImageUris.uri] = uri
-        } > 0
-    }
-
-    override suspend fun edit(imageUri: ImageUri): Boolean = dbQuery {
-        ImageUris.update({ ImageUris.id eq imageUri.id }) {
-            it[receiptId] = imageUri.receiptId
-            it[uri] = imageUri.uri
+            it[receiptId] = dto.receiptId
+            it[uri] = dto.uri
         } > 0
     }
 
