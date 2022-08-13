@@ -53,7 +53,7 @@ fun Route.receiptRouting() {
             }
             else {
                 if(receiptDao.edit(id, body)) {
-                    transactionDao.edit(id, TransactionDto())
+                    transactionDao.edit(id)
                     call.respond(HttpStatusCode.OK)
                 }
                 else {
@@ -64,7 +64,7 @@ fun Route.receiptRouting() {
         delete("{id}/delete") {
             val id = call.parameters.getOrFail<Long>("id")
             receiptDao.delete(id)
-            transactionDao.edit(id, TransactionDto())
+            transactionDao.edit(id)
             call.respondRedirect("/receipt")
         }
     }

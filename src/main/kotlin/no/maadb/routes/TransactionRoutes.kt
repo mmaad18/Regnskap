@@ -41,7 +41,7 @@ fun Route.transactionRouting() {
                 call.respond(HttpStatusCode.NotFound, "Could not find transaction with id: ${id}.")
             }
             else {
-                if(transactionDao.edit(id, TransactionDto())) {
+                if(transactionDao.edit(id)) {
                     call.respond(HttpStatusCode.OK)
                 }
                 else {
