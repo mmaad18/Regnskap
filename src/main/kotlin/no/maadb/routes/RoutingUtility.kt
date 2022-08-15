@@ -33,14 +33,14 @@ suspend fun isTransaction(id: Long, call: ApplicationCall): Boolean {
     }
 }
 
-fun writeBase64Image(encodedImage: String, uri: String) {
+suspend fun writeBase64Image(encodedImage: String, uri: String) {
     val imageByteArray = Base64.getDecoder().decode(encodedImage)
     val image = ImageIO.read(ByteArrayInputStream(imageByteArray))
 
     ImageIO.write(image, "png", File(uri))
 }
 
-fun encodeImageBase64(uri: String): String {
+suspend fun encodeImageBase64(uri: String): String {
     val bufferedImage = ImageIO.read(File(uri))
     val byteArrayOutputStream = ByteArrayOutputStream()
     ImageIO.write(bufferedImage, "png", byteArrayOutputStream)
