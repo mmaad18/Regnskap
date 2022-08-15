@@ -22,6 +22,7 @@ fun Route.imageUriRouting() {
                 if (imageUri == null) {
                     call.respond(HttpStatusCode.BadRequest, "Could not create image uri.")
                 } else {
+                    writeBase64Image(body.encodedImage, imageUri.uri)
                     call.respond(HttpStatusCode.Created, imageUri)
                 }
             }
@@ -49,6 +50,7 @@ fun Route.imageUriRouting() {
                     call.respond(HttpStatusCode.NotFound, "Could not find image uri with id: ${id}.")
                 } else {
                     if (imageUriDao.edit(id, body)) {
+                        writeBase64Image(body.encodedImage, imageUri.uri)
                         call.respond(HttpStatusCode.OK)
                     } else {
                         call.respond(HttpStatusCode.BadRequest, "Could not update image uri with id: ${id}.")
@@ -60,6 +62,15 @@ fun Route.imageUriRouting() {
             val id = call.parameters.getOrFail<Long>("id")
             imageUriDao.delete(id)
             call.respondRedirect("/imageuri")
+        }
+        get("{id}/content") {
+            val id = call.parameters.getOrFail<Long>("id")
+            val imageUri = imageUriDao.byId(id)
+            if (imageUri == null) {
+                call.respond(HttpStatusCode.NotFound, "Could not find image uri with id: ${id}.")
+            } else {
+                call.respond(HttpStatusCode.OK, ImageUriDto(imageUri.receiptId, encodeImageBase64(imageUri.uri)))
+            }
         }
     }
 }

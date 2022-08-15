@@ -14,4 +14,4 @@ object ImageUris : Table() {
 }
 
 @Serializable
-data class ImageUriDto(val receiptId: Long, val uri: String)
+data class ImageUriDto(val receiptId: Long, val encodedImage: String)
